@@ -1,5 +1,6 @@
 // Inspired by: https://github.com/facebook/facebook-sdk-for-unity/blob/master/Facebook.Unity.Settings/FacebookSettings.cs
 
+using System.IO;
 using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
@@ -35,6 +36,8 @@ public class AdjustSettings : ScriptableObject
     [SerializeField]
     private string[] androidUriSchemes = new string[0];
 
+    private const string AssetPath = "Assets/Editor/Adjust/AdjustSettings.asset";
+
     public static AdjustSettings Instance
     {
         get
@@ -43,15 +46,14 @@ public class AdjustSettings : ScriptableObject
 
             if (instance == null)
             {
-                // Create AdjustSettings.asset inside the folder in which AdjustSettings.cs reside.
-                instance = ScriptableObject.CreateInstance<AdjustSettings>();
-                var guids = AssetDatabase.FindAssets(string.Format("{0} t:script", "AdjustSettings"));
-                if (guids == null || guids.Length <= 0)
+                string directoryPath = new FileInfo(AssetPath).Directory.FullName;
+                if (!Directory.Exists(directoryPath))
                 {
-                    return instance;
+                    Directory.CreateDirectory(directoryPath);
                 }
-                var assetPath = AssetDatabase.GUIDToAssetPath(guids[0]).Replace("AdjustSettings.cs", "AdjustSettings.asset");
-                AssetDatabase.CreateAsset(instance, assetPath);
+                
+                instance = CreateInstance<AdjustSettings>();
+                AssetDatabase.CreateAsset(instance, AssetPath);
             }
 
             return instance;
@@ -64,13 +66,7 @@ public class AdjustSettings : ScriptableObject
         {
             if (instance == null)
             {
-                var guids = AssetDatabase.FindAssets(string.Format("{0} t:ScriptableObject", "AdjustSettings"));
-                if (guids == null || guids.Length <= 0)
-                {
-                    return instance;
-                }
-                var assetPath = AssetDatabase.GUIDToAssetPath(guids[0]);
-                instance = (AdjustSettings)AssetDatabase.LoadAssetAtPath(assetPath, typeof(AdjustSettings));
+                instance = (AdjustSettings)AssetDatabase.LoadAssetAtPath(AssetPath, typeof(AdjustSettings));
             }
 
             return instance;
